@@ -114,7 +114,7 @@ func Parse(s *io.SectionReader) (r *SAUCE, err error) {
 // ParseReader reads the SAUCE header from a stream
 func ParseReader(i io.Reader) (r *SAUCE, err error) {
 	var b []byte
-	if b, err = ioutil.ReadAll(i); b != nil {
+	if b, err = ioutil.ReadAll(i); err != nil {
 		return nil, err
 	}
 	if len(b) < 128 {
