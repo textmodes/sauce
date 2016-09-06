@@ -49,7 +49,8 @@ var (
 	// Version is the SAUCE version
 	Version = [2]byte{0, 0}
 
-	errShortRead = errors.New("Short read")
+	// No SAUCE record found
+	ErrNoRecord = errors.New(`sauce: no SAUCE record found`)
 )
 
 // SAUCE (Standard Architecture for Universal Comment Extensions) record.
@@ -97,7 +98,7 @@ func Parse(s *io.SectionReader) (r *SAUCE, err error) {
 		return
 	}
 	if n < 128 {
-		return nil, errShortRead
+		return nil, io.ErrShortBuffer
 	}
 
 	b := make([]byte, 128)
@@ -106,7 +107,7 @@ func Parse(s *io.SectionReader) (r *SAUCE, err error) {
 		return
 	}
 	if i != 128 {
-		return nil, errShortRead
+		return nil, io.ErrShortBuffer
 	}
 	return ParseBytes(b)
 }
@@ -118,7 +119,7 @@ func ParseReader(i io.Reader) (r *SAUCE, err error) {
 		return nil, err
 	}
 	if len(b) < 128 {
-		return nil, errShortRead
+		return nil, io.ErrShortBuffer
 	}
 	return ParseBytes(b)
 }
@@ -126,11 +127,11 @@ func ParseReader(i io.Reader) (r *SAUCE, err error) {
 // ParseBytes reads the SAUCE header from a slice of bytes
 func ParseBytes(b []byte) (r *SAUCE, err error) {
 	if len(b) < 128 {
-		return nil, errors.New("Short read")
+		return nil, io.ErrShortBuffer
 	}
 	o := len(b) - 128
 	if !bytes.Equal(b[o+0:o+5], ID[:]) {
-		return nil, errors.New("No SAUCE record")
+		return nil, ErrNoRecord
 	}
 
 	r = New()
